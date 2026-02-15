@@ -12,24 +12,23 @@ type Profile = {
 
 export default function MemoryWall() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const TOTAL_SLOTS = 2000; // you can increase later
 
- useEffect(() => {
-  const loadSlots = async () => {
-    const { data, error } = await supabase
-      .from("wall_slots")
-      .select("id, user_id")
-      .limit(2000); // start small
+  useEffect(() => {
+    const loadProfiles = async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, username, avatar_url")
+        .not("username", "is", null);
 
-    if (error) {
-      console.log(error);
-      return;
-    }
+      if (error) {
+        console.log(error);
+        return;
+      }
 
-    setSlots(data || []);
-  };
+      setProfiles(data || []);
+    };
 
-  loadSlots();
-}, []);
     loadProfiles();
   }, []);
 
@@ -41,34 +40,45 @@ export default function MemoryWall() {
         🌌 Memory Wall
       </div>
 
-      {/* Glowing Grid */}
-      <div className="grid grid-cols-10 gap-8 p-20 mt-20 justify-items-center">
-        {profiles.map((profile) => (
-          <Link
-            key={profile.id}
-            href={`/capsule/${profile.username}`}
-            className="group"
-          >
-            {profile.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt="avatar"
-                className="w-16 h-16 rounded-full object-cover
-                           shadow-[0_0_20px_rgba(255,255,255,0.4)]
-                           group-hover:scale-110
-                           group-hover:shadow-[0_0_35px_rgba(255,255,255,0.8)]
-                           transition duration-300"
-              />
-            ) : (
-              <div
-                className="w-6 h-6 rounded-full bg-white
-                           shadow-[0_0_15px_rgba(255,255,255,0.7)]
-                           group-hover:shadow-[0_0_30px_rgba(255,255,255,1)]
-                           transition duration-300"
-              />
-            )}
-          </Link>
-        ))}
+      {/* Pixel Grid */}
+      <div className="grid grid-cols-40 gap-3 p-10 mt-32 justify-items-center">
+        {Array.from({ length: TOTAL_SLOTS }).map((_, index) => {
+          const profile = profiles[index];
+
+          return profile ? (
+            <Link
+              key={index}
+              href={`/capsule/${profile.username}`}
+              className="group"
+            >
+              {profile.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt="avatar"
+                  className="w-8 h-8 rounded-full object-cover
+                             shadow-[0_0_12px_rgba(255,255,255,0.4)]
+                             group-hover:scale-110
+                             group-hover:shadow-[0_0_20px_rgba(255,255,255,0.8)]
+                             transition duration-300"
+                />
+              ) : (
+                <div
+                  className="w-8 h-8 rounded-full bg-purple-500
+                             shadow-[0_0_12px_rgba(168,85,247,0.7)]
+                             group-hover:scale-110
+                             group-hover:shadow-[0_0_20px_rgba(168,85,247,1)]
+                             transition duration-300"
+                />
+              )}
+            </Link>
+          ) : (
+            <div
+              key={index}
+              className="w-8 h-8 rounded-full bg-purple-700
+                         shadow-[0_0_10px_rgba(168,85,247,0.5)]"
+            />
+          );
+        })}
       </div>
     </main>
   );
