@@ -11,18 +11,22 @@ export default function ResetPassword() {
 
   useEffect(() => {
     const handleRecovery = async () => {
-      // This exchanges the access_token from the URL
-      const { data, error } = await supabase.auth.getSession();
+      // This processes the recovery hash and sets session
+      const { data, error } = await supabase.auth.exchangeCodeForSession(
+        window.location.href
+      );
 
       if (error) {
-        console.error(error);
+        alert("Invalid or expired reset link.");
+        router.push("/login");
+        return;
       }
 
       setLoading(false);
     };
 
     handleRecovery();
-  }, []);
+  }, [router]);
 
   const handleUpdatePassword = async () => {
     if (!password) {
