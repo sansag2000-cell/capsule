@@ -10,12 +10,11 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+    const handleRecovery = async () => {
+      // Supabase automatically sets session from recovery URL
+      const { data } = await supabase.auth.getSession();
 
-      if (!session) {
+      if (!data.session) {
         alert("Invalid or expired reset link.");
         router.push("/login");
         return;
@@ -24,12 +23,12 @@ export default function ResetPassword() {
       setLoading(false);
     };
 
-    checkSession();
+    handleRecovery();
   }, [router]);
 
   const handleUpdatePassword = async () => {
     if (!password) {
-      alert("Please enter a new password");
+      alert("Enter a new password");
       return;
     }
 
@@ -53,7 +52,7 @@ export default function ResetPassword() {
 
       <input
         type="password"
-        placeholder="New password"
+        placeholder="New Password"
         className="w-full max-w-sm mb-6 p-3 bg-gray-900 text-white rounded"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
