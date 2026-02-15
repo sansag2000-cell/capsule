@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Login() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function Login() {
     if (error) {
       alert(error.message);
     } else {
-      router.push("/");
+      router.push("/dashboard");
     }
   };
 
@@ -42,10 +43,17 @@ export default function Login() {
       <input
         type="password"
         placeholder="Password"
-        className="w-full max-w-sm mb-6 p-3 bg-gray-900 text-white rounded"
+        className="w-full max-w-sm mb-2 p-3 bg-gray-900 text-white rounded"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
+
+      <Link
+        href="/forgot-password"
+        className="text-sm text-blue-400 hover:underline mb-6"
+      >
+        Forgot password?
+      </Link>
 
       <button
         onClick={handleLogin}

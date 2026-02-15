@@ -2,30 +2,29 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Navbar() {
-  const router = useRouter();
-
   const [name, setName] = useState<string | null>(null);
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
 
-      console.log("Logged user:", user);
+      if (!user) {
+        setUser(null);
+        return;
+      }
 
-      if (!user) return;
+      setUser(user);
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("profiles")
         .select("display_name, name, avatar_url")
         .eq("id", user.id)
         .single();
-
-      console.log("Profile data:", data);
-      console.log("Profile error:", error);
 
       if (data) {
         setName(data.display_name || data.name);
@@ -38,30 +37,53 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   return (
-    <nav className="flex justify-between items-center px-6 py-4 border-b border-gray-800 bg-black text-white">
-      <h1 className="text-lg font-semibold">Capsule</h1>
+    <nav className="relative flex justify-between items-center px-6 py-6 bg-black text-white border-b border-gray-800">
 
-      <div className="flex items-center gap-3">
-        {avatar && (
-          <img
-            src={avatar}
-            alt="avatar"
-            className="w-8 h-8 rounded-full object-cover"
-          />
+      {/* Left: Brand */}
+      <Link href="/" className="text-xl font-semibold tracking-wide">
+        Capsule
+      </Link>
+
+      {/* Center: Emotional Line (NOT clickable) */}
+      <div className="absolute left-1/2 transform -translate-x-1/2 text-sm opacity-60 tracking-wide pointer-events-none">
+        For when the time is right.
+      </div>
+
+      {/* Right Side */}
+      <div className="flex items-center gap-4">
+
+        {user ? (
+          <>
+            {avatar && (
+              <img
+                src={avatar}
+                alt="avatar"
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            )}
+
+            {name && <span className="text-sm">Hello, {name} 👋</span>}
+
+            <button
+              onClick={handleLogout}
+              className="text-sm opacity-70 hover:opacity-100 transition"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <Link
+            href="/login"
+            className="text-sm opacity-70 hover:opacity-100 transition"
+          >
+            Already claimed?
+          </Link>
         )}
 
-        {name && <span>Hello, {name} 👋</span>}
-
-        <button
-          onClick={handleLogout}
-          className="bg-white text-black px-4 py-1 rounded-full text-sm"
-        >
-          Logout
-        </button>
       </div>
     </nav>
   );
